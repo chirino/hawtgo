@@ -44,14 +44,14 @@ type Expander interface {
     Expand(key string) (value string, ok bool)
 }
 
-// ToLookup converts an Expander to a Lookup function.
-func ToLookup(expander Expander) func(string) string {
-    return func(v string) string {
+// Expand replaces ${var} or $var in the string based on the Expander.
+func Expand(value string, expander Expander) string {
+    return os.Expand(value, func(v string) string {
         if v, ok := expander.Expand(v); ok {
             return v
         }
         return ""
-    }
+    })
 }
 
 // ExpandNotFound returns an Expander that never finds the value
