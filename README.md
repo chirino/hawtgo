@@ -1,19 +1,19 @@
-# A Hawt Go Library
+# My Hawt set of Go Packages
 
 Install with:
 
     go get github.com/chirino/hawtgo
 
-## Package: github.com/chirino/hawtgo/sh 
+## Pacakge: sh [![GoDoc](https://godoc.org/github.com/chirino/hawtgo/sh?status.svg)](https://godoc.org/github.com/chirino/hawtgo/sh)
 
-The `sh` package makes executing processes from go almost as easy as using a shell.
+The sh package makes executing processes from go almost as easy as using a shell.
 
-For example see the following:
+See the following example that takes care of splitting up the command arguments
+and doing variable replacement:
 
 	 sh.New().Line(`cp "${HOME}/my file.txt" /tmp/target.txt`).MustExec()
 
-Notice that you don't need to break up the command arguments into an array and 
-that shell style argument quoting is supported. 
+sh will can run command string like the ones you would enter into your shell.
 
 The `sh.New()` function give you back a new immutable builder object. You can safely
 reuse it for multiple command invocations.
