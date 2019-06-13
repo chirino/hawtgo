@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Package line lets you parse command line strings into arguments.
 package line
 
 import (

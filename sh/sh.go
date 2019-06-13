@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- package sh
+
+//
+// Package sh helps you to more easily execute processes.
+package sh
 
 import (
     "fmt"
