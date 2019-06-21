@@ -263,8 +263,9 @@ func (sh *Sh) String() string {
             arg = strings.ReplaceAll(arg, "\n", `\n`)
             arg = strings.ReplaceAll(arg, "\t", `\t`)
             arg = strings.ReplaceAll(arg, `"`, `\"`)
-            t[i] = `""` + arg + `""`
+            arg = `"` + arg + `"`
         }
+        t[i] = arg
     }
     return strings.Join(t, " ")
 }

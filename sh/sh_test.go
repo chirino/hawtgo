@@ -145,3 +145,17 @@ func TestCmdLineArgsUsage(t *testing.T) {
     assert.Equal([]string{`go`, `'"world"'`}, c.Args)
 
 }
+
+func TestToString(t *testing.T) {
+    assert := assert.New(t)
+
+    // Let's configure som common settings like env and reuse it
+    // for multiple commands
+    cmdEnv := sh.New().Env(ENV)
+
+    // use Expand(false) to disable expansion for all arguments
+    c := cmdEnv.Line(`go '${hello} hiram' ${hello}`)
+    assert.Equal( `go "${hello} hiram" world`, c.String())
+
+
+}
