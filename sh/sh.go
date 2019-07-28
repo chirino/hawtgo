@@ -19,6 +19,7 @@
 package sh
 
 import (
+    "bytes"
     "fmt"
     "github.com/chirino/hawtgo/sh/line"
     magesh "github.com/magefile/mage/sh"
@@ -143,11 +144,35 @@ type Sh struct {
     dir                 string
     commandLog          io.Writer
     commandLogPrefix    string
+    stdout              io.Writer
+    stderr              io.Writer
+    stdin               io.Reader
 }
 
 // New returns a new sh.Sh
 func New() *Sh {
-    return &Sh{expanders: ExpandEnv()}
+    return &Sh{expanders: ExpandEnv(), stdout:os.Stdout, stderr:os.Stderr, stdin:os.Stdin}
+}
+
+// Stdout returns a new sh.Sh configured to write process stdout with the specified writer.
+func (this *Sh) Stdout(writer io.Writer) *Sh {
+    var sh = *this;
+    sh.stdout = writer
+    return &sh
+}
+
+// Stderr returns a new sh.Sh configured to write process stderr with the specified writer.
+func (this *Sh) Stderr(writer io.Writer) *Sh {
+    var sh = *this;
+    sh.stderr = writer
+    return &sh
+}
+
+// Stdin returns a new sh.Sh configured feed process stdin with the specified reader.
+func (this *Sh) Stdin(reader io.Reader) *Sh {
+    var sh = *this;
+    sh.stdin = reader
+    return &sh
 }
 
 // Line returns a new sh.Sh with the command specified as a single command.  The command line is
@@ -224,9 +249,9 @@ func (sh *Sh) Cmd() *exec.Cmd {
         }
     }
     c.Dir = sh.dir
-    c.Stderr = os.Stderr
-    c.Stdout = os.Stdout
-    c.Stdin = os.Stdin
+    c.Stderr = sh.stderr
+    c.Stdout = sh.stdout
+    c.Stdin = sh.stdin
     return c
 }
 
@@ -269,6 +294,46 @@ func (sh *Sh) String() string {
     }
     return strings.Join(t, " ")
 }
+
+
+type OutputOptions struct {
+    NoStderr bool
+    NoStdout bool
+    NoTrim bool
+}
+
+func (sh *Sh) Output(opt...OutputOptions) (output string, exitCode int, err error) {
+    buf := &bytes.Buffer{}
+    c := sh.Cmd()
+    c.Stdout = buf
+    c.Stderr = buf
+
+    trim := true
+    for _, o := range opt {
+        if o.NoStdout {
+            c.Stdout = sh.stdout
+        }
+        if o.NoStderr {
+            c.Stderr = sh.stderr
+        }
+        if o.NoTrim {
+            trim = false
+        }
+    }
+
+    if sh.commandLog != nil {
+        fmt.Fprintln(sh.commandLog, sh.commandLogPrefix, sh.String())
+    }
+
+    err = c.Run()
+    output = buf.String()
+    exitCode = magesh.ExitStatus(err)
+    if trim {
+        output = strings.TrimSuffix(output, "\n")
+    }
+    return
+}
+
 
 // Exec runs the command and returns the process exit code, and any error encountered when running the command.
 func (sh *Sh) Exec() (rc int, err error) {
