@@ -21,5 +21,5 @@ func (sh *Sh) Exec() (err error) {
 		panic("sh.Stdin and sh.Exec cannot be used on the same command") // easier to find invalid usage.
 	}
 	c := sh.Cmd()
-	return syscall.Exec(c.Path, c.Args[1:], c.Env)
+	return syscall.Exec(c.Path, c.Args, c.Env)
 }
