@@ -333,7 +333,7 @@ func (sh *Sh) Output(opt ...OutputOptions) (output string, exitCode int, err err
 	}
 
 	if sh.commandLog != nil {
-		fmt.Fprintln(sh.commandLog, sh.commandLogPrefix, sh.String())
+		fmt.Fprintf(sh.commandLog, "%s%s", sh.commandLogPrefix, sh.String())
 	}
 
 	err = c.Run()
@@ -349,7 +349,7 @@ func (sh *Sh) Output(opt ...OutputOptions) (output string, exitCode int, err err
 func (sh *Sh) ExitStatus() (rc int, err error) {
 	c := sh.Cmd()
 	if sh.commandLog != nil {
-		fmt.Fprintln(sh.commandLog, sh.commandLogPrefix, sh.String())
+		fmt.Fprintf(sh.commandLog, "%s%s", sh.commandLogPrefix, sh.String())
 	}
 	err = c.Run()
 	return magesh.ExitStatus(err), err

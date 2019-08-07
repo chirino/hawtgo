@@ -23,7 +23,7 @@ func (sh *Sh) Exec() (err error) {
 	}
 	c := sh.Cmd()
 	if sh.commandLog != nil {
-		fmt.Fprintln(sh.commandLog, sh.commandLogPrefix, sh.String())
+		fmt.Fprintf(sh.commandLog, "%s%s", sh.commandLogPrefix, sh.String())
 	}
 	return syscall.Exec(c.Path, c.Args, c.Env)
 }
