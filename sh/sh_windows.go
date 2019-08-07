@@ -26,4 +26,5 @@ func (sh *Sh) Exec() (err error) {
 	}
 
 	os.Exit(rc)
+	return nil
 }
