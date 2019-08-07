@@ -3,6 +3,7 @@
 package sh
 
 import (
+	"fmt"
 	"os"
 	"syscall"
 )
@@ -21,5 +22,8 @@ func (sh *Sh) Exec() (err error) {
 		panic("sh.Stdin and sh.Exec cannot be used on the same command") // easier to find invalid usage.
 	}
 	c := sh.Cmd()
+	if sh.commandLog != nil {
+		fmt.Fprintln(sh.commandLog, sh.commandLogPrefix, sh.String())
+	}
 	return syscall.Exec(c.Path, c.Args, c.Env)
 }
