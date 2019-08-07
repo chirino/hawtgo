@@ -313,30 +313,40 @@ type OutputOptions struct {
 	NoTrim   bool
 }
 
+func (sh *Sh) Run() error {
+	c := sh.Cmd()
+	if sh.commandLog != nil {
+		fmt.Fprintf(sh.commandLog, "%s%s\n", sh.commandLogPrefix, sh.String())
+	}
+	return c.Run()
+}
+
 func (sh *Sh) Output(opt ...OutputOptions) (output string, exitCode int, err error) {
 	buf := &bytes.Buffer{}
-	c := sh.Cmd()
-	c.Stdout = buf
-	c.Stderr = buf
-
+	captureStdout := true
+	captureStderr := true
 	trim := true
 	for _, o := range opt {
 		if o.NoStdout {
-			c.Stdout = sh.stdout
+			captureStdout = false
 		}
 		if o.NoStderr {
-			c.Stderr = sh.stderr
+			captureStderr = false
 		}
 		if o.NoTrim {
 			trim = false
 		}
 	}
-
+	if captureStdout {
+		sh = sh.Stdout(buf)
+	}
+	if captureStderr {
+		sh = sh.Stderr(buf)
+	}
 	if sh.commandLog != nil {
 		fmt.Fprintf(sh.commandLog, "%s%s\n", sh.commandLogPrefix, sh.String())
 	}
-
-	err = c.Run()
+	err = sh.Run()
 	output = buf.String()
 	exitCode = magesh.ExitStatus(err)
 	if trim {
@@ -345,21 +355,16 @@ func (sh *Sh) Output(opt ...OutputOptions) (output string, exitCode int, err err
 	return
 }
 
-// Exec runs the command and returns the process exit code, and any error encountered when running the command.
-func (sh *Sh) ExitStatus() (rc int, err error) {
-	c := sh.Cmd()
-	if sh.commandLog != nil {
-		fmt.Fprintf(sh.commandLog, "%s%s\n", sh.commandLogPrefix, sh.String())
-	}
-	err = c.Run()
-	return magesh.ExitStatus(err), err
+// ExitStatus runs the command and returns the process exit code, or 1 if any other error occured.
+func (sh *Sh) ExitCode() int {
+	return magesh.ExitStatus(sh.Run())
 }
 
 // MustExec runs the process and panics if it returns a non zero exit code..
-func (sh *Sh) MustExitStatus() {
-	rc, err := sh.ExitStatus()
+func (sh *Sh) MustZeroExit() {
+	rc := sh.ExitCode()
 	if rc != 0 {
-		panic(fmt.Errorf("<%s> failed: return code=%d, error: %s", sh.String(), rc, err))
+		panic(fmt.Errorf("<%s> failed: exit code=%d", sh.String(), rc))
 	}
 }
 

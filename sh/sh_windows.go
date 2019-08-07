@@ -20,11 +20,6 @@ func (sh *Sh) Exec() (err error) {
 		panic("sh.Stdin and sh.Exec cannot be used on the same command") // easier to find invalid usage.
 	}
 
-	rc, err := sh.ExitStatus()
-	if err != nil {
-		return err
-	}
-
-	os.Exit(rc)
+	os.Exit(sh.ExitCode())
 	return nil
 }
